@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
 import { mount } from '@vue/test-utils';
+import { fireEvent } from '@testing-library/vue';
 import { createTestingPinia } from '@pinia/testing';
 import { setActivePinia } from 'pinia';
 import { mockedStore } from '@/__tests__/utils';
@@ -142,6 +143,44 @@ describe('InstanceAiConversation', () => {
 		expect(conversation.emitted('agent-attachment-restored')?.[0]).toEqual([
 			{ type: 'agent', id: 'agent-1', projectId: 'proj-1', pending: true },
 		]);
+	});
+
+	it('awaits beforeSend before sending, restoring the draft if it rejects', async () => {
+		const beforeSend = vi.fn().mockRejectedValueOnce(new Error('flush failed'));
+		const renderer = createThreadComponentRenderer(
+			InstanceAiConversation,
+			{
+				props: { beforeSend },
+				global: { stubs: { InstanceAiInput: InstanceAiInputStub } },
+			},
+			() => thread,
+		);
+		const { getByTestId } = renderer();
+
+		// The stub only passes a `restoreDraft` callback with an attachment queued.
+		await fireEvent.click(getByTestId('instance-ai-input-add-attachment'));
+		await fireEvent.click(getByTestId('instance-ai-input-submit'));
+		await vi.waitFor(() => expect(beforeSend).toHaveBeenCalled());
+
+		expect(thread.sendMessage).not.toHaveBeenCalled();
+		expect(getByTestId('instance-ai-input-draft').textContent).toBe('Normal message');
+		expect(getByTestId('instance-ai-input-attachments').textContent).toBe('attached');
+	});
+
+	it('sends the message once beforeSend resolves', async () => {
+		const beforeSend = vi.fn().mockResolvedValue(undefined);
+		const renderer = createThreadComponentRenderer(
+			InstanceAiConversation,
+			{
+				props: { beforeSend },
+				global: { stubs: { InstanceAiInput: InstanceAiInputStub } },
+			},
+			() => thread,
+		);
+		const { getByTestId } = renderer();
+
+		await fireEvent.click(getByTestId('instance-ai-input-submit'));
+		await vi.waitFor(() => expect(thread.sendMessage).toHaveBeenCalled());
 	});
 
 	it('exposes pendingComposerContext for panels beside the conversation', () => {

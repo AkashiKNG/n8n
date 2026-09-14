@@ -24,6 +24,8 @@ const props = defineProps<{
 	linkTo?: (threadId: string) => RouteLocationRaw;
 	/** Given → the new-thread button is a `RouterLink` (so cmd/middle-click open in a new tab). Omitted → a `<button>` that emits `new`. */
 	newThreadTo?: RouteLocationRaw;
+	/** The assistant is actively building — rows stop being interactive so a click can't race it. */
+	disabled?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -131,7 +133,11 @@ function handleThreadAction(action: string, threadId: string) {
 </script>
 
 <template>
-	<div :class="$style.container" data-test-id="instance-ai-thread-list">
+	<div
+		:class="$style.container"
+		data-test-id="instance-ai-thread-list"
+		:aria-disabled="disabled || undefined"
+	>
 		<!-- Sidebar header -->
 		<div :class="$style.header">
 			<N8nText :class="$style.title" tag="div" size="medium" bold>
@@ -194,7 +200,10 @@ function handleThreadAction(action: string, threadId: string) {
 					<div
 						v-for="thread in group.threads"
 						:key="thread.id"
-						:class="[$style.threadItem, { [$style.active]: thread.id === props.activeThreadId }]"
+						:class="[
+							$style.threadItem,
+							{ [$style.active]: thread.id === props.activeThreadId, [$style.disabled]: disabled },
+						]"
 						data-test-id="instance-ai-thread-item"
 					>
 						<!-- Inline rename mode -->
@@ -331,6 +340,11 @@ function handleThreadAction(action: string, threadId: string) {
 
 	&.active {
 		background-color: var(--color--background--light-1);
+	}
+
+	&.disabled {
+		pointer-events: none;
+		opacity: var(--opacity--disabled, 0.5);
 	}
 }
 

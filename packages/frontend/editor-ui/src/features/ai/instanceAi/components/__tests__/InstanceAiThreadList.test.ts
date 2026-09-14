@@ -127,6 +127,17 @@ describe('InstanceAiThreadList', () => {
 		expect(getByTestId('instance-ai-new-thread-button').tagName).toBe('A');
 	});
 
+	it('marks the list and its rows disabled while the assistant is building', () => {
+		const { container, getAllByTestId } = renderList({ props: { disabled: true } });
+		expect(container.querySelector('[data-test-id="instance-ai-thread-list"]')).toHaveAttribute(
+			'aria-disabled',
+			'true',
+		);
+		for (const item of getAllByTestId('instance-ai-thread-item')) {
+			expect(item).toHaveClass('disabled');
+		}
+	});
+
 	it('emits collapse when the collapse button is clicked', async () => {
 		const { getByTestId, emitted } = renderList();
 		await fireEvent.click(getByTestId('instance-ai-sidebar-collapse'));

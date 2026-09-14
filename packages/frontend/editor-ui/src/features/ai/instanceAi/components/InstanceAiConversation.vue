@@ -63,6 +63,11 @@ import AgentSection from './AgentSection.vue';
 import { collectActiveBuilderAgents, messageHasVisibleContent } from '../builderAgents';
 import CreditWarningBanner from '@/features/ai/assistant/components/Agent/CreditWarningBanner.vue';
 
+const props = defineProps<{
+	/** Runs before every send (e.g. flush a pending autosave). Rejecting cancels the send. */
+	beforeSend?: () => Promise<void>;
+}>();
+
 const emit = defineEmits<{
 	'thread-missing': [];
 	'agent-attachment-restored': [attachment: InstanceAiAgentAttachment];
@@ -396,13 +401,24 @@ onUnmounted(() => {
 });
 
 // --- Message handlers ---
-function handleSubmit(
+async function handleSubmit(
 	message: string,
 	attachments?: InstanceAiAttachment[],
 	restoreDraft?: () => boolean,
 ) {
 	if (!settingsStore.isWorkflowBuilderAvailable) {
 		return;
+	}
+
+	if (props.beforeSend) {
+		try {
+			await props.beforeSend();
+		} catch {
+			// The caller's own flow (e.g. a failed autosave) already surfaced its
+			// error — put the draft back and stop, same as a refused send below.
+			restoreDraft?.();
+			return;
+		}
 	}
 
 	// Reset scroll on new user message
