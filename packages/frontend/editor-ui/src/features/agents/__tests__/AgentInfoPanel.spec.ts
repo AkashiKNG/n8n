@@ -307,6 +307,8 @@ describe('AgentInfoPanel', () => {
 			toolCallConcurrency: 2,
 			promptCaching: { enabled: true },
 		});
+		// A user-driven pick carries no meta — only an auto-applied default does.
+		expect(events.at(-1)?.[1]).toBeUndefined();
 	});
 
 	it('preserves reasoning when selecting a model that supports it', async () => {
@@ -382,6 +384,7 @@ describe('AgentInfoPanel', () => {
 					model: 'anthropic/claude-sonnet-4-5',
 					credential: 'credential-1',
 				}),
+				{ source: 'auto' },
 			]);
 		});
 
@@ -409,6 +412,7 @@ describe('AgentInfoPanel', () => {
 					model: 'anthropic/claude-sonnet-4-5',
 					credential: 'credential-1',
 				}),
+				{ source: 'auto' },
 			]);
 			expect(wrapper.find('[data-testid="agent-default-model-hint"]').exists()).toBe(true);
 		});
@@ -437,6 +441,7 @@ describe('AgentInfoPanel', () => {
 					model: 'openai/gpt-5-mini',
 					credential: AI_GATEWAY_MANAGED_TAG,
 				}),
+				{ source: 'auto' },
 			]);
 		});
 
