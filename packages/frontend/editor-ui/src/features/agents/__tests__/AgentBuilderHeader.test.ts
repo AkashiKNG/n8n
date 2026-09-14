@@ -4,7 +4,7 @@ import { mount, flushPromises, type VueWrapper } from '@vue/test-utils';
 import { ref } from 'vue';
 
 import type { AgentResource } from '../types';
-import { instanceAiCreateAgentRoute } from '@/features/ai/instanceAi/createAgentRoute';
+import { AGENT_BUILDER_VIEW } from '../constants';
 
 const ensureLoadedMock = vi.fn();
 const agentsListRef = ref<AgentResource[] | null>(null);
@@ -421,11 +421,16 @@ describe('AgentBuilderHeader', () => {
 		expect(wrapper.emitted('switch-agent')).toEqual([['a2']]);
 	});
 
-	it('navigates to Instance AI for agent creation from the switcher footer', async () => {
+	it('navigates to the builder with a pending agent for agent creation from the switcher footer', async () => {
 		const wrapper = mountHeader();
 
 		await wrapper.find('[data-testid="agent-header-new-agent"]').trigger('click');
 
-		expect(routerPush).toHaveBeenCalledWith(instanceAiCreateAgentRoute('p1'));
+		expect(routerPush).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: AGENT_BUILDER_VIEW,
+				params: expect.objectContaining({ projectId: 'p1' }),
+			}),
+		);
 	});
 });

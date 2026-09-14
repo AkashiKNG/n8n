@@ -23,7 +23,7 @@ import type { DropdownMenuItemProps } from '@n8n/design-system';
 import type { ActionDropdownItem } from '@n8n/design-system';
 import { useI18n, type BaseTextKey } from '@n8n/i18n';
 import { PROJECT_AGENTS } from '@/features/agents/constants';
-import { instanceAiCreateAgentRoute } from '@/features/ai/instanceAi/createAgentRoute';
+import { newAgentRoute } from '../createAgentRoute';
 
 import AgentPublishButton from './AgentPublishButton.vue';
 import AgentValidationTooltip from './AgentValidationTooltip.vue';
@@ -122,7 +122,7 @@ function onSwitcherSelect(id: string) {
 }
 
 function onCreateAgent() {
-	void router.push(instanceAiCreateAgentRoute(props.projectId));
+	void router.push(newAgentRoute(props.projectId));
 }
 
 function onBreadcrumbSelect(item: PathItem) {
