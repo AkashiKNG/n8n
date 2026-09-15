@@ -13,9 +13,9 @@ services:
       N8N_SECURE_COOKIE: 'false'
       # Atrás de um proxy reverso: confia no X-Forwarded-For de um salto.
       N8N_PROXY_HOPS: '1'
-      # URL pública usada nos links de webhook. Defina WEBHOOK_URL (ex.: http://meu-n8n.localhost/)
-      # nas variáveis de ambiente; sem ela, fica o padrão do n8n.
-      WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:5678/}
+      # URL pública usada nos links de webhook (teste e produção). Defina WEBHOOK_URL
+      # (ex.: http://meu-n8n.localhost/) nas variáveis de ambiente; sem ela, fica o padrão do n8n.
+      N8N_WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:5678/}
       # Fuso dos gatilhos agendados (Schedule/Cron).
       GENERIC_TIMEZONE: America/Sao_Paulo
       TZ: America/Sao_Paulo
