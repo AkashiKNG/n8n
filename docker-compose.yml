@@ -1,0 +1,24 @@
+# n8n com a imagem oficial, para rodar este repositório com um clique (ex.: Perez OS).
+#
+# O repositório é um monorepo pnpm: a interface (editor) só existe depois de compilar todos os
+# pacotes com `pnpm build:docker`, e o docker/images/n8n/Dockerfile espera essa pasta ./compiled
+# pronta. Por isso este compose usa a imagem publicada pelo próprio n8n a partir deste código.
+services:
+  n8n:
+    image: n8nio/n8n:2.39.5
+    ports:
+      - '5678:5678'
+    environment:
+      # Acesso local por http (sem HTTPS): o cookie de sessão não pode exigir conexão segura.
+      N8N_SECURE_COOKIE: 'false'
+      # Atrás de um proxy reverso: confia no X-Forwarded-For de um salto.
+      N8N_PROXY_HOPS: '1'
+      # Fuso dos gatilhos agendados (Schedule/Cron).
+      GENERIC_TIMEZONE: America/Sao_Paulo
+      TZ: America/Sao_Paulo
+    volumes:
+      # Workflows, credenciais e o banco SQLite sobrevivem a rebuild e atualização.
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:
